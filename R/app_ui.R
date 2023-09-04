@@ -2,17 +2,53 @@
 #'
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
-#' @import shiny
+#' @import shiny shinydashboard bslib
 #' @noRd
 app_ui <- function(request) {
+
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
+    waiter::use_waiter(),
     # Your application UI logic
-    fluidPage(
-      h1("RefineParking")
+    page_sidebar(
+      title = 'Investigate UVP and OST at parking',
+      sidebar = sidebar(
+        mod_select_float_ui("sidebar")
+      ),
+      layout_columns(
+        col_widths = c(-3,6,-3,6,6),
+        row_heights = c(1,2),
+        card(
+          card_header("Float map"),
+          full_screen = TRUE,
+          mod_float_map_ui("float_map")
+        ),
+        card(
+          card_header("UVP6 particle concentration"),
+          full_screen = TRUE,
+          mod_uvp6_ui("uvp6")
+        ),
+        card(
+          card_header("OST flux"),
+          full_screen = TRUE,
+          mod_ost_ui("ost")
+        )
+      )
     )
   )
+    # dashboardPage(
+    #   dashboardHeader(
+    #     title = ''
+    #   ),
+    #   dashboardSidebar(
+    #     mod_select_float_ui("sidebar")
+    #   ),
+    #   dashboardBody(
+    #     mod_float_map_ui("float_map"),
+    #     mod_uvp6_ui("uvp6"),
+    #     mod_ost_ui("ost"))
+    #   )
 }
 
 #' Add external Resources to the Application
