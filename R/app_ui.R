@@ -17,12 +17,17 @@ app_ui <- function(request) {
         mod_select_float_ui("sidebar")
       ),
       layout_columns(
-        col_widths = c(-3,6,-3,6,6),
+        col_widths = c(6,6,6,6),
         row_heights = c(1,2),
         card(
           card_header("Float map"),
           full_screen = TRUE,
           mod_float_map_ui("float_map")
+        ),
+        card(
+          card_header("Spectral slope"),
+          full_screen = TRUE,
+          mod_spectral_slope_ui("spectral_slope")
         ),
         card(
           card_header("UVP6 particle concentration"),

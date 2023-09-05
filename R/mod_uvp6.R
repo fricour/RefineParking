@@ -25,8 +25,6 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    Sys.setlocale("LC_TIME", "en_GB.utf8")
-
     # particle size classe
     lpm_classes <- c('NP_Size_102','NP_Size_128','NP_Size_161','NP_Size_203',
                      'NP_Size_256','NP_Size_323','NP_Size_406','NP_Size_512','NP_Size_645','NP_Size_813','NP_Size_1020','NP_Size_1290',

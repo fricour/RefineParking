@@ -2,6 +2,7 @@
 
 export("%>%")
 export(compute_daily_mean_part_conc)
+export(compute_spectral_slope)
 export(extract_LPM)
 export(extract_cp_data)
 export(run_app)

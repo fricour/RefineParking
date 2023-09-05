@@ -24,7 +24,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    Sys.setlocale("LC_TIME", "en_GB.utf8")
+    #Sys.setlocale("LC_TIME", "en_GB.utf8")
 
     # create waiter
     w <- waiter::Waiter$new(ns("plot_parking_OST"), color = 'white', html = spin_dots())
