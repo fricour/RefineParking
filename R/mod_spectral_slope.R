@@ -50,11 +50,8 @@ mod_spectral_slope_server <- function(id, user_float, float_colour_zone){
       p <- ggiraph::girafe(ggobj = p, width_svg = 8)
     })
 
+    # TODO : directly subset the data to compute the spectral slope depending on the selected input parking depth? That would save some time and have a better controlled behaviour. BUT in the
+    # actual implementation, even if the behaviour is not perfect, it's still quite useful....
+
   })
 }
-
-## To be copied in the UI
-# mod_spectral_slope_ui("spectral_slope_1")
-
-## To be copied in the server
-# mod_spectral_slope_server("spectral_slope_1")

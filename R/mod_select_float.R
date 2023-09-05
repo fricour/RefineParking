@@ -9,10 +9,46 @@
 #' @importFrom shiny NS tagList
 mod_select_float_ui <- function(id){
   ns <- NS(id)
+
+  # temporary css
+  css <- "
+.selectize-input .item[data-value='6904240'], .selectize-input .item[data-value='6904241'], .selectize-input .item[data-value='4903634'], .selectize-input .item[data-value='1902578'] {
+  background-color: #E41A1C !important;
+}
+.selectize-input .item[data-value='1902601'], .selectize-input .item[data-value='3902498'] {
+  background-color: #4DAF4A !important;
+}
+.selectize-input .item[data-value='1902593'], .selectize-input .item[data-value='4903658'] {
+  background-color: #FFFF33 !important;
+}
+.selectize-input .item[data-value='1902637'], .selectize-input .item[data-value='4903739'], .selectize-input .item[data-value='4903740'] {
+  background-color: #984EA3 !important;
+}
+.selectize-input .item[data-value='2903783'] {
+  background-color: #F781BF !important;
+}
+.selectize-input .item[data-value='2903787'], .selectize-input .item[data-value='4903657'] {
+  background-color: #FF7F00 !important;
+}
+.selectize-input .item[data-value='3902471'], .selectize-input .item[data-value='5906970'], .selectize-input .item[data-value='6990503'] {
+  background-color: #A65628 !important;
+}
+.selectize-input .item[data-value='4903660'], .selectize-input .item[data-value='6990514'] {
+  background-color: #377EB8 !important;
+}
+.selectize-input .item[data-value='6903093'], .selectize-input .item[data-value='6903094'] {
+  background-color: #999999 !important;
+}
+"
+
   tagList(
+    tags$head(
+      tags$style(HTML(css))
+    ),
     selectInput(inputId = ns("wmo"),
                 label = "Float WMO",
                 choices = unique(RefineParking::c_rover_calib$WMO),
+                selectize = TRUE,
                 multiple = TRUE,
     ),
     selectInput(inputId = ns("park_depth"),
