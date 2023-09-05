@@ -11,6 +11,7 @@
 mod_spectral_slope_ui <- function(id){
   ns <- NS(id)
   tagList(
+    actionButton(inputId = ns("compute_spectral_slope"), label = "Compute spectral slope"),
     girafeOutput(ns("plot_spectral_slope"), height = "700px", width = "100%")
   )
 }
@@ -26,11 +27,11 @@ mod_spectral_slope_server <- function(id, user_float, float_colour_zone){
     w <- waiter::Waiter$new(ns("plot_spectral_slope"), color = 'white', html = spin_dots())
 
     # slope data to plot
-    slope_data <- reactive({
+    slope_data <- eventReactive(input$compute_spectral_slope, {
       req(user_float$wmo())
       w$show()
       # compute daily meaan spectral slope for all floats given in input
-      tmp <- purrr::map_dfr(user_float$wmo(), compute_spectral_slope)
+      tmp <- purrr::map_dfr(user_float$wmo(), compute_spectral_slope, .progress = TRUE)
       # add colour scheme
       tmp <- merge(tmp, float_colour_zone)
     })

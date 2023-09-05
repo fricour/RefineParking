@@ -34,7 +34,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
       req(user_float$wmo())
       w$show()
       # derive ost data
-      tmp <- purrr::map_dfr(user_float$wmo(), extract_ost_data)
+      tmp <- purrr::map_dfr(user_float$wmo(), extract_ost_data, .progress = TRUE)
       # for plotting
       tmp <- tmp %>%
         dplyr::mutate(park_depth = factor(park_depth, levels = c('200 m', '500 m', '1000 m'))) %>%

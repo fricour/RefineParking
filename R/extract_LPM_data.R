@@ -73,7 +73,7 @@ extract_LPM <- function(ncfile){
       part_spectra <- part_spectra %>% dplyr::select(depth, park_depth, cycle, juld, dplyr::everything())
 
       # remove some weird numbers associated to BAD QCs (but all QCs are at 0 so not JULD_QC is not useful here)
-      part_spectra <- part_spectra %>% dplyr::filter(juld > '2020-01-01', juld < '2025-01-01')
+      part_spectra <- part_spectra %>% dplyr::filter(juld > '2021-01-01', juld < '2025-01-01')
 
       # close NetCDF
       ncdf4::nc_close(nc_data)

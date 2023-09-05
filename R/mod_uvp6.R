@@ -49,12 +49,16 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone){
     # create waiter
     w <- waiter::Waiter$new(ns("plot_parking_uvp"), color = 'white', html = spin_dots())
 
+    # add debounce option if floats are selected too fast
+    float_d <- user_float$wmo %>% debounce(1000)
+
     # UVP6 data to plot
     particle_data <- reactive({
-      req(user_float$wmo())
+      #req(user_float$wmo())
+      req(float_d())
       w$show()
       # compute daily mean particle concentration for all floats given in input
-      tmp <- purrr::map_dfr(user_float$wmo(), compute_daily_mean_part_conc, .progress = TRUE)
+      tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, .progress = TRUE)
       # add colour scheme
       tmp <- merge(tmp, float_colour_zone)
     })
