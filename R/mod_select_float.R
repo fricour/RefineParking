@@ -54,6 +54,12 @@ mod_select_float_ui <- function(id){
     selectInput(inputId = ns("park_depth"),
                 label = "Parking depth",
                 choices = c('200 m', '500 m', '1000 m'))
+    ,
+    numericInput(inputId = ns("uvp_point_size"),
+                 label = "UVP6 point size",
+                 value = 1,
+                 min = 0.1,
+                 max= Inf)
   )
 }
 
@@ -67,7 +73,8 @@ mod_select_float_server <- function(id){
     # return selected WMO and profile number
     list(
       wmo = reactive(input$wmo),
-      park_depth = reactive(input$park_depth)
+      park_depth = reactive(input$park_depth),
+      uvp_point_size = reactive(input$uvp_point_size)
     )
   })
 }

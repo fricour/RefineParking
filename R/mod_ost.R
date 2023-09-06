@@ -31,7 +31,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
 
     # OST data to plot
     ost_data <- eventReactive(input$run_computation, {
-      req(user_float$wmo())
+      req(c(user_float$wmo(), user_float$park_depth()))
       w$show()
       # derive ost data
       tmp <- purrr::map_dfr(user_float$wmo(), extract_ost_data, .progress = TRUE)
@@ -48,22 +48,41 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
     output$plot_parking_OST <- ggiraph::renderGirafe({
       shiny::validate(shiny::need(nrow(ost_data()) > 0, message = "Enter a valid WMO or a float that is equipped with the OST."))
 
-      small_flux <- ost_data() %>% ggplot() +
+      # filter data on parking depth
+      plot_data <- ost_data() %>%
+        dplyr::filter(park_depth == user_float$park_depth()) %>%
+        dplyr::mutate(total_flux = small_flux + large_flux)
+
+      small_flux <- plot_data %>% ggplot() +
         geom_point(aes(x = min_time, y = small_flux, colour = colour)) +
         scale_colour_identity() +
-        facet_wrap(~park_depth, scales = 'free') +
-        theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{small}$ (mg C m$^{-2}$ day$^{-1}$)')) +
+        theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{small}$')) +
         scale_y_continuous(trans = 'log10') +
         theme(legend.position = "none") +
         theme(text = element_text(size = 10)) +
         scale_x_date(labels = scales::date_format("%b/%y"), date_breaks = '3 month') +
-        theme(axis.text.x = element_text(angle=45, hjust = 1))
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+        theme(axis.title.x=element_blank(),
+              axis.text.x=element_blank(),
+              axis.ticks.x=element_blank())
 
-      large_flux <- ost_data() %>% ggplot() +
+      large_flux <- plot_data %>% ggplot() +
         geom_point(aes(x = min_time, y = large_flux, colour = colour)) +
         scale_color_identity() +
-        facet_wrap(~park_depth, scales = 'free') +
-        theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{large}$ (mg C m$^{-2}$ day$^{-1}$)')) +
+        theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{large}$')) +
+       scale_y_continuous(trans = 'log10') +
+        theme(legend.position = "none") +
+        theme(text = element_text(size = 10)) +
+        scale_x_date(labels = scales::date_format("%b/%y"), date_breaks = '3 month') +
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+        theme(axis.title.x=element_blank(),
+              axis.text.x=element_blank(),
+              axis.ticks.x=element_blank())
+
+      total_flux <- plot_data %>% ggplot() +
+        geom_point(aes(x = min_time, y = total_flux, colour = colour)) +
+        scale_color_identity() +
+        theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{total}$')) +
         scale_y_continuous(trans = 'log10') +
         theme(legend.position = "none") +
         theme(text = element_text(size = 10)) +
@@ -72,9 +91,9 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
 
       # final plot combining both small and large fluxes
       #p <- gridExtra::grid.arrange(small_flux, large_flux, nrow = 2)
-      p <- cowplot::plot_grid(small_flux, large_flux, nrow = 2)
+      #p <- cowplot::plot_grid(small_flux, large_flux, total_flux, nrow = 3)
+      p <- patchwork::wrap_plots(small_flux, large_flux, total_flux, nrow = 3)
       ggiraph::girafe(ggobj = p, width_svg = 8)
-
     })
 
 

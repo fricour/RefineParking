@@ -35,7 +35,7 @@ app_ui <- function(request) {
           mod_uvp6_ui("uvp6")
         ),
         card(
-          card_header("OST flux"),
+          card_header("OST flux (units: mgC/m²/day)"),
           full_screen = TRUE,
           mod_ost_ui("ost")
         )

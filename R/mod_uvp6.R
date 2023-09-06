@@ -67,7 +67,7 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone){
     output$plot_parking_uvp <- renderGirafe({
       shiny::validate(shiny::need(nrow(particle_data()) > 0, message = "Error retrieving UVP6 data."))
       p <- particle_data() %>% dplyr::filter(park_depth == user_float$park_depth()) %>% ggplot() +
-        geom_point(aes(juld, mean_conc, colour = colour)) +
+        geom_point(aes(juld, mean_conc, colour = colour), size = user_float$uvp_point_size()) +
         scale_colour_identity() +
         theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
         scale_y_continuous(trans = 'log10') +
