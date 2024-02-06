@@ -44,7 +44,7 @@ extract_LPM <- function(ncfile){
       colnames(part_spectra) <- lpm_classes
 
       # extract number of images
-      image_number <- ncdf4::ncvar_get(nc_data, 'IMAGE_NUMBER_PARTICLES_LPM')
+      image_number <- ncdf4::ncvar_get(nc_data, 'NB_IMAGE_PARTICLES')
 
       # divide particle concentrations by number of images
       part_spectra <- part_spectra %>% dplyr::mutate(dplyr::across(NP_Size_50.8:NP_Size_2580, ~.x/(0.7*image_number))) # 0.7 = UVP6 image volume
