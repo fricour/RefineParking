@@ -34,13 +34,19 @@ mod_spectral_slope_server <- function(id, user_float, float_colour_zone){
       tmp <- purrr::map_dfr(user_float$wmo(), compute_spectral_slope, .progress = TRUE)
       # add colour scheme
       tmp <- merge(tmp, float_colour_zone)
+      # add colour for parking depth levels
+      tmp <- tmp %>% dplyr::mutate(colour_depth = dplyr::case_when(
+        park_depth == '200 m' ~ '#fde725',
+        park_depth == '500 m' ~ '#21908c',
+        park_depth == '1000 m' ~ '#440154')
+      )
     })
 
     # render plot
     output$plot_spectral_slope <- renderGirafe({
       shiny::validate(shiny::need(nrow(slope_data()) > 0, message = "Error computing spectral slope."))
       p <- slope_data() %>% dplyr::filter(park_depth == user_float$park_depth()) %>% ggplot() +
-        geom_point(aes(x = date, y = mean_slope, colour = colour)) +
+        geom_point(aes(x = date, y = mean_slope, colour = colour_depth)) +
         scale_colour_identity() +
         theme_bw() + labs(x = 'Date', y = 'Daily average slope') +
         theme(legend.position = "none") +

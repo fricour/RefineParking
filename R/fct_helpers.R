@@ -9,12 +9,12 @@
 #' @noRd
 #'
 #' @example compute_daily_mean_part_conc(6904240)
-compute_daily_mean_part_conc <- function(wmo){
+compute_daily_mean_part_conc <- function(wmo, lpm_classes){
 
   # particle size classe
-  lpm_classes <- c('NP_Size_102','NP_Size_128','NP_Size_161','NP_Size_203',
-                   'NP_Size_256','NP_Size_323','NP_Size_406','NP_Size_512','NP_Size_645','NP_Size_813','NP_Size_1020','NP_Size_1290',
-                   'NP_Size_1630','NP_Size_2050')
+  # lpm_classes <- c('NP_Size_102','NP_Size_128','NP_Size_161','NP_Size_203',
+  #                  'NP_Size_256','NP_Size_323','NP_Size_406','NP_Size_512','NP_Size_645','NP_Size_813','NP_Size_1020','NP_Size_1290',
+  #                  'NP_Size_1630','NP_Size_2050')
 
   ncfile <- paste0('/data1/GDAC/AUX/coriolis/',wmo,'/',wmo,'_Rtraj_aux.nc')
 
@@ -24,8 +24,9 @@ compute_daily_mean_part_conc <- function(wmo){
     uvp6_data <- uvp6_data %>%
       tidyr::pivot_longer(cols = lpm_classes, names_to = 'size', values_to = 'conc') %>%
       dplyr::mutate(size = size %>% stringr::str_remove('NP_Size_') %>% as.numeric()) %>%
-      dplyr::mutate(juld = lubridate::as_date(juld)) %>%
-      dplyr::filter(size >= 102, size < 2050)
+      dplyr::mutate(juld = lubridate::as_date(juld)) #%>%
+      #dplyr::filter(size >= 102, size < 2050)
+
     # compute daily mean particle concentration at each cycle and at each drifting depth
     mean_uvp6_data <- uvp6_data %>% dplyr::group_by(cycle, size, park_depth, juld) %>% dplyr::summarize(mean_conc = mean(conc, na.rm=T))
     # add wmo

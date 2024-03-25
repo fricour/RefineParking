@@ -52,31 +52,59 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone){
     # add debounce option if floats are selected too fast
     float_d <- user_float$wmo %>% debounce(1000)
 
+    # same for size classes
+    size_class_d <- user_float$size_class %>% debounce(100)
+
     # UVP6 data to plot
     particle_data <- reactive({
       #req(user_float$wmo())
-      req(float_d())
+      req(float_d(), req(size_class_d()))
       w$show()
       # compute daily mean particle concentration for all floats given in input
-      tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, .progress = TRUE)
+      tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, lpm_classes = size_class_d(), .progress = TRUE)
       # add colour scheme
       tmp <- merge(tmp, float_colour_zone)
+      # add colour for parking depth levels
+      tmp <- tmp %>% dplyr::mutate(colour_depth = dplyr::case_when(
+        park_depth == '200 m' ~ '#fde725',
+        park_depth == '500 m' ~ '#21908c',
+        park_depth == '1000 m' ~ '#440154')
+      )
     })
 
     # render plot
     output$plot_parking_uvp <- renderGirafe({
       shiny::validate(shiny::need(nrow(particle_data()) > 0, message = "Error retrieving UVP6 data."))
-      p <- particle_data() %>% dplyr::filter(park_depth == user_float$park_depth()) %>% ggplot() +
-        geom_point(aes(juld, mean_conc, colour = colour), size = user_float$uvp_point_size()) +
-        scale_colour_identity() +
-        theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
-        scale_y_continuous(trans = 'log10') +
-        facet_wrap(~size, scales = 'free_y', labeller = as_labeller(facet_all)) +
-        theme(legend.position = "none") +
-        theme(text = element_text(size = 10)) +
-        scale_x_date(labels = scales::date_format("%b/%y"), date_breaks = '3 month') +
-        theme(axis.text.x = element_text(angle=45, hjust = 1))
-      p <- ggiraph::girafe(ggobj = p, width_svg = 8)
+
+      if(user_float$free_y_scale()){
+        p <- particle_data() %>% dplyr::filter(park_depth %in% user_float$park_depth()) %>% ggplot() +
+          geom_point(aes(juld, mean_conc, colour = colour_depth), size = user_float$uvp_point_size()) +
+          scale_colour_identity() +
+          theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
+          scale_y_continuous(trans = 'log10') +
+          facet_wrap(~size, scales = 'free_y', labeller = as_labeller(facet_all)) +
+          #theme(legend.position = "bottom") +
+          theme(text = element_text(size = 10)) +
+          scale_x_date(labels = scales::date_format("%b/%y"), date_breaks = '3 month') +
+          theme(axis.text.x = element_text(angle=45, hjust = 1))
+
+        p <- ggiraph::girafe(ggobj = p, width_svg = 8)
+      }else{
+        p <- particle_data() %>% dplyr::filter(mean_conc <= user_float$uvp_max_abundance()) %>%
+          dplyr::filter(park_depth %in% user_float$park_depth()) %>%
+          ggplot() +
+          geom_point(aes(juld, mean_conc, colour = colour_depth), size = user_float$uvp_point_size()) +
+          scale_colour_identity() +
+          theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
+          scale_y_continuous(trans = 'log10') +
+          facet_wrap(~size, scales = 'fixed', labeller = as_labeller(facet_all)) +
+          #theme(legend.position = "bottom") +
+          theme(text = element_text(size = 10)) +
+          scale_x_date(labels = scales::date_format("%b/%y"), date_breaks = '3 month') +
+          theme(axis.text.x = element_text(angle=45, hjust = 1))
+
+        p <- ggiraph::girafe(ggobj = p, width_svg = 8)
+      }
     })
   })
 }

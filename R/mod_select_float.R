@@ -39,6 +39,16 @@ mod_select_float_ui <- function(id){
 .selectize-input .item[data-value='6903093'], .selectize-input .item[data-value='6903094'] {
   background-color: #999999 !important;
 }
+.selectize-input .item[data-value='200 m'] {
+  background-color: #FDE725 !important;
+}
+.selectize-input .item[data-value='500 m'] {
+  background-color: #21908C !important;
+}
+.selectize-input .item[data-value='1000 m'] {
+  color: #ffffff !important;
+  background-color: #440154 !important;
+}
 "
 
   tagList(
@@ -53,13 +63,44 @@ mod_select_float_ui <- function(id){
     ),
     selectInput(inputId = ns("park_depth"),
                 label = "Parking depth",
-                choices = c('200 m', '500 m', '1000 m'))
+                choices = c('200 m', '500 m', '1000 m'),
+                multiple = TRUE,
+                selected = '200 m')
     ,
+    selectInput(inputId = ns("size_class"),
+                label = "UVP6 size class",
+                choices = c('102 - 128 µm' = 'NP_Size_102',
+                            '128 - 161 µm' = 'NP_Size_128',
+                            '161 - 203 µm' = 'NP_Size_161',
+                            '203 - 256 µm' = 'NP_Size_203',
+                            '256 - 323 µm' = 'NP_Size_256',
+                            '323 - 406 µm' = 'NP_Size_323',
+                            '406 - 512 µm' = 'NP_Size_406',
+                            '512 - 645 µm' = 'NP_Size_512',
+                            '645 - 813 µm' = 'NP_Size_645',
+                            '0.81 - 1.02 mm' = 'NP_Size_813',
+                            '1.02 - 1.29 mm' = 'NP_Size_1020',
+                            '1.29 - 1.63 mm' = 'NP_Size_1290',
+                            '1.63 - 2.05 mm' = 'NP_Size_1630',
+                            '2.05 - 2.50 mm' = 'NP_Size_2050'),
+                selected = NULL,
+                multiple = TRUE,
+                selectize = TRUE
+    ),
     numericInput(inputId = ns("uvp_point_size"),
                  label = "UVP6 point size",
-                 value = 1,
+                 value = 2,
                  min = 0.1,
-                 max= Inf)
+                 step = 1,
+                 max = Inf),
+    numericInput(inputId = ns("uvp_max_abundance"),
+                 label = "UVP6 max abundance",
+                 value = 10,
+                 min = 0,
+                 max = Inf),
+    checkboxInput(inputId = ns("free_y_scale"),
+                  label = "Free y scales for UVP6 abundance",
+                  value = TRUE)
   )
 }
 
@@ -74,7 +115,10 @@ mod_select_float_server <- function(id){
     list(
       wmo = reactive(input$wmo),
       park_depth = reactive(input$park_depth),
-      uvp_point_size = reactive(input$uvp_point_size)
+      size_class = reactive(input$size_class),
+      uvp_point_size = reactive(input$uvp_point_size),
+      uvp_max_abundance = reactive(input$uvp_max_abundance),
+      free_y_scale = reactive(input$free_y_scale)
     )
   })
 }

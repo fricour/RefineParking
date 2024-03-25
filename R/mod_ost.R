@@ -51,10 +51,15 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
       # filter data on parking depth
       plot_data <- ost_data() %>%
         dplyr::filter(park_depth == user_float$park_depth()) %>%
-        dplyr::mutate(total_flux = small_flux + large_flux)
+        dplyr::mutate(total_flux = small_flux + large_flux) %>%
+        dplyr::mutate(colour_depth = dplyr::case_when(
+          park_depth == '200 m' ~ '#fde725',
+          park_depth == '500 m' ~ '#21908c',
+          park_depth == '1000 m' ~ '#440154')
+        )
 
       small_flux <- plot_data %>% ggplot() +
-        geom_point(aes(x = min_time, y = small_flux, colour = colour)) +
+        geom_point(aes(x = min_time, y = small_flux, colour = colour_depth)) +
         scale_colour_identity() +
         theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{small}$')) +
         scale_y_continuous(trans = 'log10') +
@@ -67,7 +72,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
               axis.ticks.x=element_blank())
 
       large_flux <- plot_data %>% ggplot() +
-        geom_point(aes(x = min_time, y = large_flux, colour = colour)) +
+        geom_point(aes(x = min_time, y = large_flux, colour = colour_depth)) +
         scale_color_identity() +
         theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{large}$')) +
        scale_y_continuous(trans = 'log10') +
@@ -80,7 +85,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone){
               axis.ticks.x=element_blank())
 
       total_flux <- plot_data %>% ggplot() +
-        geom_point(aes(x = min_time, y = total_flux, colour = colour)) +
+        geom_point(aes(x = min_time, y = total_flux, colour = colour_depth)) +
         scale_color_identity() +
         theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{total}$')) +
         scale_y_continuous(trans = 'log10') +
