@@ -28,7 +28,7 @@ mod_spectral_slope_server <- function(id, user_float, float_colour_zone, path_to
 
     # slope data to plot
     slope_data <- eventReactive(input$compute_spectral_slope, {
-      req(user_float$wmo())
+      #req(user_float$wmo())
       w$show()
       # compute daily meaan spectral slope for all floats given in input
       if(is.null(user_float$region())){
