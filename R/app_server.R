@@ -22,5 +22,5 @@ app_server <- function(input, output, session) {
   float_colour_zone <- mod_float_map_server("float_map", path_to_index_file)
   mod_uvp6_server("uvp6", selected_float, float_colour_zone, path_to_GDAC_AUX_data)
   mod_ost_server("ost", selected_float, float_colour_zone, path_to_GDAC_CORE_data)
-  #mod_spectral_slope_server("spectral_slope", selected_float, float_colour_zone)
+  mod_spectral_slope_server("spectral_slope", selected_float, float_colour_zone, path_to_GDAC_AUX_data)
 }

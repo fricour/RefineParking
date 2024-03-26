@@ -9,10 +9,10 @@
 #' @noRd
 #'
 #' @example compute_spectral_slope(6904240)
-compute_spectral_slope <- function(wmo_float){
+compute_spectral_slope <- function(wmo_float, path_to_data){
 
   # extract UVP data at parking
-  ncfile <- paste0('/data1/GDAC/AUX/coriolis/',wmo_float,'/',wmo_float,'_Rtraj_aux.nc')
+  ncfile <- paste0(path_to_data,wmo_float,'/',wmo_float,'_Rtraj_aux.nc')
   data <- extract_LPM(ncfile)
 
   # particle size classes
