@@ -9,14 +9,14 @@
 #' @noRd
 #'
 #' @example compute_daily_mean_part_conc(6904240)
-compute_daily_mean_part_conc <- function(wmo, lpm_classes){
+compute_daily_mean_part_conc <- function(wmo, lpm_classes, path_to_data){
 
   # particle size classe
   # lpm_classes <- c('NP_Size_102','NP_Size_128','NP_Size_161','NP_Size_203',
   #                  'NP_Size_256','NP_Size_323','NP_Size_406','NP_Size_512','NP_Size_645','NP_Size_813','NP_Size_1020','NP_Size_1290',
   #                  'NP_Size_1630','NP_Size_2050')
 
-  ncfile <- paste0('/data1/GDAC/AUX/coriolis/',wmo,'/',wmo,'_Rtraj_aux.nc')
+  ncfile <- paste0(path_to_data,wmo,'/',wmo,'_Rtraj_aux.nc')
 
   if (file.exists(ncfile)) {
     uvp6_data <- extract_LPM(ncfile)
@@ -52,9 +52,9 @@ compute_daily_mean_part_conc <- function(wmo, lpm_classes){
 #' @example extract_parameter(nc_data, 'BBP700')
 #'
 #'
-extract_cp_data <- function(wmo){
+extract_cp_data <- function(wmo, path_to_data){
 
-  ncfile <- paste0('/data1/GDAC/GDAC/coriolis/',wmo,'/',wmo,'_Rtraj.nc')
+  ncfile <- paste0(path_to_data,wmo,'/',wmo,'_Rtraj.nc')
 
   # open netcdf
   nc_data <- ncdf4::nc_open(ncfile) # Rtraj files should ALWAYS exist so I am not testing it
@@ -97,7 +97,7 @@ extract_cp_data <- function(wmo){
     dplyr::select(-mc)
 
   # convert cp data to physical data
-  CSCdark <-RefineParking::c_rover_calib[RefineParking::c_rover_calib$WMO == wmo,]$CSCdark
+  CSCdark <- RefineParking::c_rover_calib[RefineParking::c_rover_calib$WMO == wmo,]$CSCdark
   CSCcal <- RefineParking::c_rover_calib[RefineParking::c_rover_calib$WMO == wmo,]$CSCcal
   x <- 0.25
   tib <- tib %>% dplyr::mutate(cp = -log((cp - CSCdark)/(CSCcal-CSCdark))/x)
@@ -113,13 +113,13 @@ extract_cp_data <- function(wmo){
 #'
 #'
 #'
-extract_ost_data <- function(wmo_float){
+extract_ost_data <- function(wmo_float, path_to_data){
 
   # parking depths (so far we only have those 3 but that might change in the future)
   park_depth <- c('200 m', '500 m', '1000 m')
 
   # extract cp data from the float
-  data <- extract_cp_data(wmo_float)
+  data <- extract_cp_data(wmo_float, path_to_data)
 
   res <- data.frame()
   max_cycle <- max(data$cycle)

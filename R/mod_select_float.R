@@ -12,42 +12,32 @@ mod_select_float_ui <- function(id){
 
   # temporary css
   css <- "
-.selectize-input .item[data-value='6904240'], .selectize-input .item[data-value='6904241'], .selectize-input .item[data-value='4903634'], .selectize-input .item[data-value='1902578'] {
+.selectize-input .item[data-value='Labrador Sea'] {
   background-color: #E41A1C !important;
 }
-.selectize-input .item[data-value='1902601'], .selectize-input .item[data-value='3902498'] {
-  background-color: #4DAF4A !important;
-}
-.selectize-input .item[data-value='1902593'], .selectize-input .item[data-value='4903658'] {
-  background-color: #FFFF33 !important;
-}
-.selectize-input .item[data-value='1902637'], .selectize-input .item[data-value='4903739'], .selectize-input .item[data-value='4903740'] {
-  background-color: #984EA3 !important;
-}
-.selectize-input .item[data-value='2903783'] {
-  background-color: #F781BF !important;
-}
-.selectize-input .item[data-value='2903787'], .selectize-input .item[data-value='4903657'] {
-  background-color: #FF7F00 !important;
-}
-.selectize-input .item[data-value='3902471'], .selectize-input .item[data-value='5906970'], .selectize-input .item[data-value='6990503'] {
-  background-color: #A65628 !important;
-}
-.selectize-input .item[data-value='4903660'], .selectize-input .item[data-value='6990514'] {
+.selectize-input .item[data-value='Arabian Sea'] {
   background-color: #377EB8 !important;
 }
-.selectize-input .item[data-value='6903093'], .selectize-input .item[data-value='6903094'] {
+.selectize-input .item[data-value='Guinea Dome']{
+  background-color: #4DAF4A !important;
+}
+.selectize-input .item[data-value='Apero mission'] {
+  background-color: #984EA3 !important;
+}
+.selectize-input .item[data-value='West Kerguelen'] {
+  background-color: #FF7F00 !important;
+}
+.selectize-input .item[data-value='East Kerguelen'] {
+  background-color: #FFFF33 !important;
+}
+.selectize-input .item[data-value='Tropical Indian Ocean'] {
+  background-color: #A65628 !important;
+}
+.selectize-input .item[data-value='South Pacific Gyre'] {
+  background-color: #F781BF !important;
+}
+.selectize-input .item[data-value='California Current'] {
   background-color: #999999 !important;
-}
-.selectize-input .item[data-value='200 m'] {
-  background-color: #FDE725 !important;
-}
-.selectize-input .item[data-value='500 m'] {
-  background-color: #21908C !important;
-}
-.selectize-input .item[data-value='1000 m'] {
-  color: #ffffff !important;
-  background-color: #440154 !important;
 }
 "
 
@@ -61,12 +51,23 @@ mod_select_float_ui <- function(id){
                 selectize = TRUE,
                 multiple = TRUE,
     ),
+    selectInput(inputId = ns("region"),
+                label = "Region",
+                choices = c("Labrador Sea", "Arabian Sea", "Guinea Dome", "Apero mission", "West Kerguelen", "East Kerguelen",
+                            "Tropical Indian Ocean", "South Pacific Gyre", "California Current"),
+                selectize = TRUE,
+                multiple = TRUE,
+    ),
+    checkboxInput(inputId = ns("region_colour"),
+                  label = "Colour by region",
+                  value = F,
+    ),
     selectInput(inputId = ns("park_depth"),
                 label = "Parking depth",
                 choices = c('200 m', '500 m', '1000 m'),
                 multiple = TRUE,
-                selected = '200 m')
-    ,
+                selected = '200 m',
+    ),
     selectInput(inputId = ns("size_class"),
                 label = "UVP6 size class",
                 choices = c('102 - 128 µm' = 'NP_Size_102',
@@ -114,6 +115,8 @@ mod_select_float_server <- function(id){
     # return selected WMO and profile number
     list(
       wmo = reactive(input$wmo),
+      region = reactive(input$region),
+      region_colour = reactive(input$region_colour),
       park_depth = reactive(input$park_depth),
       size_class = reactive(input$size_class),
       uvp_point_size = reactive(input$uvp_point_size),
