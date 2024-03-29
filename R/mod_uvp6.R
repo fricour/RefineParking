@@ -62,12 +62,22 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
       w$show() # show waiter
       # compute daily mean particle concentration for all floats given in input
       if(is.null(user_float$region())){
-        tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, lpm_classes = size_class_d(), path_to_data = path_to_floats_data, .progress = TRUE)
+        if(user_float$show_all_classes()){
+          size_class_to_show <- lpm_classes
+        }else{
+          size_class_to_show <- size_class_d()
+        }
+        tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = TRUE)
       }else{
         selected_float <- float_colour_zone %>%
           dplyr::filter(zone %in% user_float$region()) %>%
           dplyr::pull(wmo)
-        print(selected_float)
+        #print(selected_float)
+        if(user_float$show_all_classes()){
+          size_class_to_show <- lpm_classes
+        }else{
+          size_class_to_show <- size_class_d()
+        }
         tmp <- purrr::map_dfr(selected_float, compute_daily_mean_part_conc, lpm_classes = size_class_d(), path_to_data = path_to_floats_data, .progress = TRUE)
       }
       # add colour scheme
@@ -98,6 +108,8 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
                                          'East Kerguelen' = '#FFFF33',
                                          'Tropical Indian Ocean' = '#A65628',
                                          'South Pacific Gyre' = '#F781BF',
+                                         'Nordic Seas' = '#125112',
+                                         'North Pacific Gyre' = '#91C5F0',
                                          'California Current' = '#999999')) +
           theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
           scale_y_continuous(trans = 'log10') +
@@ -135,6 +147,8 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
                                            'East Kerguelen' = '#FFFF33',
                                            'Tropical Indian Ocean' = '#A65628',
                                            'South Pacific Gyre' = '#F781BF',
+                                           'Nordic Seas' = '#125112',
+                                           'North Pacific Gyre' = '#91C5F0',
                                            'California Current' = '#999999')) +
             theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
             scale_y_continuous(trans = 'log10') +

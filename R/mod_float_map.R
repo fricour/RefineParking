@@ -48,6 +48,8 @@ mod_float_map_server <- function(id, path_to_index_file){
         wmo %in% c(5906970, 3902473, 6990503, 3902471) ~ 'Tropical Indian Ocean',
         wmo %in% c(2903783) ~ 'South Pacific Gyre',
         wmo %in% c(6903093, 6903094) ~'California Current',
+        wmo %in% c(7901028, 2903794) ~ 'Nordic Seas',
+        wmo %in% c(1902685) ~ 'North Pacific Gyre',
         .default = NA
       )) %>%
       dplyr::mutate(colour = dplyr::case_when(
@@ -60,6 +62,8 @@ mod_float_map_server <- function(id, path_to_index_file){
         zone == 'Tropical Indian Ocean' ~ '#A65628',
         zone == 'South Pacific Gyre' ~ '#F781BF',
         zone == 'California Current' ~ '#999999',
+        zone == 'Nordic Seas' ~ '#125112',
+        zone == 'North Pacific Gyre' ~ '#91C5F0',
         .default = NA
       ))
 
@@ -82,6 +86,8 @@ mod_float_map_server <- function(id, path_to_index_file){
         wmo %in% c(5906970, 3902473, 6990503, 3902471) ~ 'Tropical Indian Ocean',
         wmo %in% c(2903783) ~ 'South Pacific Gyre',
         wmo %in% c(6903093, 6903094) ~'California Current',
+        wmo %in% c(7901028, 2903794) ~ 'Nordic Seas',
+        wmo %in% c(1902685) ~ 'North Pacific Gyre',
         .default = NA
       )) %>%
       dplyr::mutate(colour = dplyr::case_when(
@@ -94,6 +100,8 @@ mod_float_map_server <- function(id, path_to_index_file){
         zone == 'Tropical Indian Ocean' ~ '#A65628',
         zone == 'South Pacific Gyre' ~ '#F781BF',
         zone == 'California Current' ~ '#999999',
+        zone == 'Nordic Seas' ~ '#125112',
+        zone == 'North Pacific Gyre' ~ '#91C5F0',
         .default = NA
       ))
 

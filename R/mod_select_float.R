@@ -39,6 +39,13 @@ mod_select_float_ui <- function(id){
 .selectize-input .item[data-value='California Current'] {
   background-color: #999999 !important;
 }
+.selectize-input .item[data-value='Nordic Seas'] {
+  background-color: #125112 !important;
+  color: #FFFFFF !important;
+}
+.selectize-input .item[data-value='North Pacific Gyre'] {
+  background-color: #91C5F0 !important;
+}
 "
 
   tagList(
@@ -54,7 +61,7 @@ mod_select_float_ui <- function(id){
     selectInput(inputId = ns("region"),
                 label = "Region",
                 choices = c("Labrador Sea", "Arabian Sea", "Guinea Dome", "Apero mission", "West Kerguelen", "East Kerguelen",
-                            "Tropical Indian Ocean", "South Pacific Gyre", "California Current"),
+                            "Tropical Indian Ocean", "South Pacific Gyre", "California Current", "Nordic Seas", "North Pacific Gyre"),
                 selectize = TRUE,
                 multiple = TRUE,
     ),
@@ -88,6 +95,10 @@ mod_select_float_ui <- function(id){
                 multiple = TRUE,
                 selectize = TRUE
     ),
+    checkboxInput(inputId = ns("all_size_classes"),
+                label = "Show all size classes",
+                value = F
+    ),
     numericInput(inputId = ns("uvp_point_size"),
                  label = "UVP6 point size",
                  value = 2,
@@ -119,6 +130,7 @@ mod_select_float_server <- function(id){
       region_colour = reactive(input$region_colour),
       park_depth = reactive(input$park_depth),
       size_class = reactive(input$size_class),
+      show_all_classes = reactive(input$all_size_classes),
       uvp_point_size = reactive(input$uvp_point_size),
       uvp_max_abundance = reactive(input$uvp_max_abundance),
       free_y_scale = reactive(input$free_y_scale)

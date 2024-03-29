@@ -60,7 +60,8 @@ extract_cp_data <- function(wmo, path_to_data){
   nc_data <- ncdf4::nc_open(ncfile) # Rtraj files should ALWAYS exist so I am not testing it
 
   # extract parameter
-  value <- try(ncdf4::ncvar_get(nc_data, 'TRANSMITTANCE_PARTICLE_BEAM_ATTENUATION660'))
+  #value <- try(ncdf4::ncvar_get(nc_data, 'TRANSMITTANCE_PARTICLE_BEAM_ATTENUATION660'))
+  value <- try(ncdf4::ncvar_get(nc_data, 'CP660'))
   depth <- ncdf4::ncvar_get(nc_data, 'PRES') # TODO : take the PRES ADJUSTED when possible?
   mc <- ncdf4::ncvar_get(nc_data, 'MEASUREMENT_CODE')
   juld <- ncdf4::ncvar_get(nc_data, 'JULD')
@@ -74,15 +75,15 @@ extract_cp_data <- function(wmo, path_to_data){
     return(tibble::tibble(juld = NA, depth = NA, mc = NA, value = NA, qc = NA))
   }else{
     # check for adjusted values for that parameter
-    value_adjusted <- try(ncdf4::ncvar_get(nc_data, 'TRANSMITTANCE_PARTICLE_BEAM_ATTENUATION660_ADJUSTED'))
+    value_adjusted <- try(ncdf4::ncvar_get(nc_data, 'CP660_ADJUSTED'))
     if(class(value_adjusted)[1] == 'try-error'){ # ADJUSTED field does not exist in NetCDF file for now
-      qc <- ncdf4::ncvar_get(nc_data, 'TRANSMITTANCE_PARTICLE_BEAM_ATTENUATION660_QC')
+      qc <- ncdf4::ncvar_get(nc_data, 'CP660_QC')
       qc <- as.numeric(unlist(strsplit(qc,split="")))
     }else if(all(is.na(value_adjusted)) == TRUE){ # if TRUE, there are no adjusted values
-      qc <- ncdf4::ncvar_get(nc_data, 'TRANSMITTANCE_PARTICLE_BEAM_ATTENUATION660_QC')
+      qc <- ncdf4::ncvar_get(nc_data, 'CP660_QC')
       qc <- as.numeric(unlist(strsplit(qc,split="")))
     }else{ # there are adjusted values
-      qc <- ncdf4::ncvar_get(nc_data, 'TRANSMITTANCE_PARTICLE_BEAM_ATTENUATION660_ADJUSTED_QC')
+      qc <- ncdf4::ncvar_get(nc_data, 'CP660_ADJUSTED_QC')
       qc <- as.numeric(unlist(strsplit(qc,split="")))
     }
   }
@@ -96,11 +97,11 @@ extract_cp_data <- function(wmo, path_to_data){
     dplyr::mutate(park_depth = dplyr::if_else(depth < 350, '200 m', dplyr::if_else(depth > 750, '1000 m', '500 m'))) %>%
     dplyr::select(-mc)
 
-  # convert cp data to physical data
-  CSCdark <- RefineParking::c_rover_calib[RefineParking::c_rover_calib$WMO == wmo,]$CSCdark
-  CSCcal <- RefineParking::c_rover_calib[RefineParking::c_rover_calib$WMO == wmo,]$CSCcal
-  x <- 0.25
-  tib <- tib %>% dplyr::mutate(cp = -log((cp - CSCdark)/(CSCcal-CSCdark))/x)
+  # # convert cp data to physical data
+  # CSCdark <- RefineParking::c_rover_calib[RefineParking::c_rover_calib$WMO == wmo,]$CSCdark
+  # CSCcal <- RefineParking::c_rover_calib[RefineParking::c_rover_calib$WMO == wmo,]$CSCcal
+  # x <- 0.25
+  # tib <- tib %>% dplyr::mutate(cp = -log((cp - CSCdark)/(CSCcal-CSCdark))/x)
 
   # close nc file
   ncdf4::nc_close(nc_data)

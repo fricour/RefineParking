@@ -65,6 +65,8 @@ mod_spectral_slope_server <- function(id, user_float, float_colour_zone, path_to
                                        'East Kerguelen' = '#FFFF33',
                                        'Tropical Indian Ocean' = '#A65628',
                                        'South Pacific Gyre' = '#F781BF',
+                                       'Nordic Seas' = '#125112',
+                                       'North Pacific Gyre' = '#91C5F0',
                                        'California Current' = '#999999')) +
         theme_bw() + labs(x = 'Date', y = 'Daily average slope') +
         theme(legend.position = "top") +

@@ -77,6 +77,8 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
                                         'East Kerguelen' = '#FFFF33',
                                         'Tropical Indian Ocean' = '#A65628',
                                         'South Pacific Gyre' = '#F781BF',
+                                        'Nordic Seas' = '#125112',
+                                        'North Pacific Gyre' = '#91C5F0',
                                         'California Current' = '#999999')) +
             theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{small}$')) +
             scale_y_continuous(trans = 'log10') +
@@ -99,6 +101,8 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
                                          'East Kerguelen' = '#FFFF33',
                                          'Tropical Indian Ocean' = '#A65628',
                                          'South Pacific Gyre' = '#F781BF',
+                                         'Nordic Seas' = '#125112',
+                                         'North Pacific Gyre' = '#91C5F0',
                                          'California Current' = '#999999')) +
           theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{large}$')) +
           scale_y_continuous(trans = 'log10') +
@@ -121,6 +125,8 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
                                          'East Kerguelen' = '#FFFF33',
                                          'Tropical Indian Ocean' = '#A65628',
                                          'South Pacific Gyre' = '#F781BF',
+                                         'Nordic Seas' = '#125112',
+                                         'North Pacific Gyre' = '#91C5F0',
                                          'California Current' = '#999999')) +
           theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{total}$')) +
           scale_y_continuous(trans = 'log10') +
