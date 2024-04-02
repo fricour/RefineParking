@@ -39,7 +39,7 @@ mod_float_map_server <- function(id, path_to_index_file){
       dplyr::filter(!is.na(latitude)) %>%
       # add name for each geographic zone where floats are deployed
       dplyr::mutate(zone = dplyr::case_when(
-        wmo %in% c(6904240,6904241,1902578,4903634) ~ 'Labrador Sea',
+        wmo %in% c(6904240, 6904241, 1902578, 4903634) ~ 'Labrador Sea',
         wmo %in% c(4903660, 6990514) ~ 'Arabian Sea',
         wmo %in% c(3902498, 1902601) ~ 'Guinea Dome',
         wmo %in% c(1902637, 4903740, 4903739) ~ 'Apero mission',
