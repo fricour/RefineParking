@@ -78,7 +78,7 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
         }else{
           size_class_to_show <- size_class_d()
         }
-        tmp <- purrr::map_dfr(selected_float, compute_daily_mean_part_conc, lpm_classes = size_class_d(), path_to_data = path_to_floats_data, .progress = TRUE)
+        tmp <- purrr::map_dfr(selected_float, compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = TRUE)
       }
       # add colour scheme
       tmp <- merge(tmp, float_colour_zone)
