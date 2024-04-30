@@ -1,14 +1,14 @@
-#' @description Compute the spectral slope from UVP6 particle size spectra (at parking)
+#' @description Compute the spectral slope from UVP6 particle size spectra (when the float is at parking depth/deriving)
 #'
 #' @param wmo_float WMO of a float
 #'
-#' @return a tibble
+#' @return a tibble with 5 columns (wmo, cycle number, parking depth, date and the mean spectral slope, on a daily basis)
 #'
 #' @export
 #'
 #' @noRd
 #'
-#' @example compute_spectral_slope(6904240)
+#' @example compute_spectral_slope(6904240, "/home/flo/refine_argo")
 compute_spectral_slope <- function(wmo_float, path_to_data){
 
   # extract UVP data at parking
@@ -20,10 +20,10 @@ compute_spectral_slope <- function(wmo_float, path_to_data){
                    'NP_Size_256','NP_Size_323','NP_Size_406','NP_Size_512','NP_Size_645','NP_Size_813','NP_Size_1020','NP_Size_1290',
                    'NP_Size_1630','NP_Size_2050')
 
-  # "center" (pseudo center with a geometric progression of 2/3) of each size bin
+  # "center" of the size bin (pseudo center with a geometric progression of 2/3) of each size bin
   mid_DSE <- c(0.1147968,0.1446349,0.1822286,0.2295937,0.2892699,0.3644572,0.4591873,0.5785398,0.7289145,0.9183747,1.1570796,1.4578289,1.83674934,2.31415916)
 
-  # length of size bin
+  # length of the size bin
   size_bin <- c(0.02640633,0.03326989,0.04191744,0.05281267,0.06653979,0.08383488,0.10562533,0.13307958,0.16766976,0.21125066,0.26615915,0.33533952,0.422501323,0.532318310)
 
   # keep useful columns
@@ -49,6 +49,16 @@ compute_spectral_slope <- function(wmo_float, path_to_data){
 
 }
 
+#' @description Compute the spectral slope from UVP6 particle size spectra (when the float is at parking depth/deriving)
+#'
+#' @param i row index
+#' @param data_spectra dataframe with particle size spectra
+#' @param mid_DSE pseudo-center of the size bin ("pseudo" because the center is determined via a geometric progression)
+#' @param size_bin length of the size bin
+#'
+#' @return spectral slope for the given particle size spectrum (i row)
+#'
+#' @noRd
 compute_slope <- function(i, data_spectra, mid_DSE, size_bin){
 
   spectrum <- data_spectra[i,]

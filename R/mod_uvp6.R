@@ -1,6 +1,6 @@
 #' uvp6 UI Function
 #'
-#' @description A shiny Module.
+#' @description On the basis of WMOs (either individual WMOs or regions) and selected size classes (from 102 microns to 2.5 mm), this module recovers particle concentration.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
@@ -12,7 +12,35 @@
 mod_uvp6_ui <- function(id){
   ns <- NS(id)
 
+  # creation of input controls specific to the particle concentration plot
+  uvp6_gear <- popover(
+    bsicons::bs_icon("gear", size = "1em"),
+    numericInput(inputId = ns("uvp_point_size"),
+                 label = "Point size",
+                 value = 2,
+                 min = 0.1,
+                 step = 1,
+                 max = Inf
+                ),
+    numericInput(inputId = ns("uvp_max_abundance"),
+                 label = "Max abundance",
+                 value = 10,
+                 min = 0,
+                 max = Inf
+                 ),
+    checkboxInput(inputId = ns("show_all_classes"),
+                  label = "Show all size classes",
+                  value = F
+                 ),
+    checkboxInput(inputId = ns("free_y_scale"),
+                  label = "Free y scales",
+                  value = TRUE
+                  ),
+    title = "Input controls"
+  )
+
   tagList(
+        uvp6_gear,
         girafeOutput(ns("plot_parking_uvp"), height = "700px", width = "100%")
   )
 
@@ -57,30 +85,30 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
 
     # UVP6 data to plot
     particle_data <- reactive({
-      #req(float_d(), req(size_class_d()))
-      req(size_class_d())
-      w$show() # show waiter
+      shiny::validate(shiny::need(((!is.null(size_class_d())) || (input$show_all_classes)) && ((!is.null(user_float$region())) || (!is.null(float_d))), message = "Select a float (or a region) and a size class (or all size classes)."))
+
       # compute daily mean particle concentration for all floats given in input
       if(is.null(user_float$region())){
-        if(user_float$show_all_classes()){
+        if(input$show_all_classes){
           size_class_to_show <- lpm_classes
         }else{
           size_class_to_show <- size_class_d()
         }
+        # compute particle concentration
         tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = TRUE)
       }else{
         selected_float <- float_colour_zone %>%
           dplyr::filter(zone %in% user_float$region()) %>%
           dplyr::pull(wmo)
-        #print(selected_float)
         if(user_float$show_all_classes()){
           size_class_to_show <- lpm_classes
         }else{
           size_class_to_show <- size_class_d()
         }
+        # compute particle concentration
         tmp <- purrr::map_dfr(selected_float, compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = TRUE)
       }
-      # add colour scheme
+      # add colour based on the region
       tmp <- merge(tmp, float_colour_zone)
       # add colour for parking depth levels (not used at the moment but I keep it for later use)
       tmp <- tmp %>% dplyr::mutate(colour_depth = dplyr::case_when(
@@ -91,15 +119,16 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
       dplyr::mutate(park_depth = factor(park_depth, levels = c('200 m', '500 m', '1000 m')))
     })
 
-    # render plot
+    # render plot of particle concentration
     output$plot_parking_uvp <- renderGirafe({
       shiny::validate(shiny::need(nrow(particle_data()) > 0, message = "Error retrieving UVP6 data."))
-      shiny::validate(shiny::need(user_float$uvp_max_abundance() > 0, message = "Max abundance should be > 0."))
+      shiny::validate(shiny::need(input$uvp_max_abundance > 0, message = "Max abundance should be > 0."))
+      shiny::validate(shiny::need(!is.null(user_float$park_depth()), message = "Select a depth."))
 
-      if(user_float$free_y_scale()){
+      if(input$free_y_scale){
         if(user_float$region_colour()){
         p <- particle_data() %>% dplyr::filter(park_depth %in% user_float$park_depth()) %>% ggplot() +
-          geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = zone, tooltip = round(mean_conc, 2)), size = user_float$uvp_point_size()) +
+          geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = zone, tooltip = round(mean_conc, 2)), size = input$uvp_point_size) +
           scale_colour_manual(values = c('Labrador Sea' = '#E41A1C',
                                          'Arabian Sea' = '#377EB8',
                                          'Guinea Dome' = '#4DAF4A',
@@ -121,7 +150,7 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
           theme(axis.text.x = element_text(angle=45, hjust = 1))
         }else{
         p <- particle_data() %>% dplyr::filter(park_depth %in% user_float$park_depth()) %>% ggplot() +
-          geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = wmo, tooltip = round(mean_conc, 2)), size = user_float$uvp_point_size()) +
+          geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = wmo, tooltip = round(mean_conc, 2)), size = input$uvp_point_size) +
           theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
           scale_y_continuous(trans = 'log10') +
           facet_wrap(~size, scales = 'free_y', labeller = as_labeller(facet_all)) +
@@ -137,8 +166,8 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
         if(user_float$region_colour()){
           p <- particle_data() %>%
             dplyr::filter(park_depth %in% user_float$park_depth()) %>%
-            dplyr::filter(mean_conc <= user_float$uvp_max_abundance()) %>% ggplot() +
-            geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = zone, tooltip = round(mean_conc, 2)), size = user_float$uvp_point_size()) +
+            dplyr::filter(mean_conc <= input$uvp_max_abundance) %>% ggplot() +
+            geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = zone, tooltip = round(mean_conc, 2)), size = input$uvp_point_size) +
             scale_colour_manual(values = c('Labrador Sea' = '#E41A1C',
                                            'Arabian Sea' = '#377EB8',
                                            'Guinea Dome' = '#4DAF4A',
@@ -164,8 +193,8 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
         }else{
           p <- particle_data() %>%
             dplyr::filter(park_depth %in% user_float$park_depth()) %>%
-            dplyr::filter(mean_conc <= user_float$uvp_max_abundance()) %>% ggplot() +
-            geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = wmo, tooltip = round(mean_conc, 2)), size = user_float$uvp_point_size()) +
+            dplyr::filter(mean_conc <= input$uvp_max_abundance) %>% ggplot() +
+            geom_point_interactive(aes(juld, mean_conc, shape = park_depth, colour = wmo, tooltip = round(mean_conc, 2)), size = input$uvp_point_size) +
             theme_bw() + labs(x = 'Date', y = 'Particle abundance (#/L)') +
             scale_y_continuous(trans = 'log10') +
             facet_wrap(~size, scales = 'free_y', labeller = as_labeller(facet_all)) +

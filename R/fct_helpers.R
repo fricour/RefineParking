@@ -142,7 +142,7 @@ extract_ost_data <- function(wmo_float, path_to_data){
 
 }
 
-## FROM JEAN-OLIVIER IRISSON
+## FROM JEAN-OLIVIER IRISSON, see https://github.com/jiho/castr/blob/master/R/slide.R
 #' Apply a function in a sliding window along a vector
 #'
 #' Allows to compute a moving average, moving median, or even moving standard deviation, etc. in a generic way.

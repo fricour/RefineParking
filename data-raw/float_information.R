@@ -1,9 +1,5 @@
-# C-Rover calibration
-c_rover_calib <- vroom::vroom('data-raw/crover_calibration.csv')
+# list of floats equipped with UVP6 and OST
+wmo_list <- data.table::fread('data-raw/wmo_list.csv')
 
-# remove unknown float (see why with Antoine Poteau)
-c_rover_calib <- c_rover_calib %>% dplyr::filter(WMO != 7901000)
-# remove float not yet deployed
-c_rover_calib <- c_rover_calib %>% dplyr::filter(WMO != 4903659)
-
-usethis::use_data(c_rover_calib, overwrite = TRUE)
+# save data as .rda file
+usethis::use_data(wmo_list, overwrite = TRUE)

@@ -124,12 +124,12 @@ derive_ost_flux <- function(data, wmo_float){
   part_slope_tmp <- part_slope %>% dplyr::mutate(juld = time, colour = 'slope')
 
   # plot
-  jump_plot <- plotly::plot_ly(tmp, x = ~juld, y = ~cp, type = 'scatter', mode = 'markers', color = ~colour, colors = c('#003366','#E31B23', '#FFC325')) %>%
-    plotly::add_lines(data= part_slope_tmp, x = ~juld, y = ~cp, split = ~group, color = I('#DCEEF3'), showlegend = F) %>%
-    plotly::layout(title= paste0('Drifting time: ', round(drifting_time,3), ' days\n',
-                         'Mean ATN slope (light blue): ', round(mean_slope,3), ' day-1\n',
-                         'POC flux (small particles): ', round(poc_flux,1), ' mg C m-2 day-1\n',
-                         'POC flux (large particles): ', round(large_part_poc_flux,1), ' mg C m-2 day-1'), yaxis = list(title = 'Cp (1/m)'), xaxis = list(title = 'Time'))
+  # jump_plot <- plotly::plot_ly(tmp, x = ~juld, y = ~cp, type = 'scatter', mode = 'markers', color = ~colour, colors = c('#003366','#E31B23', '#FFC325')) %>%
+  #   plotly::add_lines(data= part_slope_tmp, x = ~juld, y = ~cp, split = ~group, color = I('#DCEEF3'), showlegend = F) %>%
+  #   plotly::layout(title= paste0('Drifting time: ', round(drifting_time,3), ' days\n',
+  #                        'Mean ATN slope (light blue): ', round(mean_slope,3), ' day-1\n',
+  #                        'POC flux (small particles): ', round(poc_flux,1), ' mg C m-2 day-1\n',
+  #                        'POC flux (large particles): ', round(large_part_poc_flux,1), ' mg C m-2 day-1'), yaxis = list(title = 'Cp (1/m)'), xaxis = list(title = 'Time'))
 
   #return(jump_plot)
   #return(list('jump_plot' = jump_plot, 'jump_table' = tmp3))

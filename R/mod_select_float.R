@@ -54,7 +54,7 @@ mod_select_float_ui <- function(id){
     ),
     selectInput(inputId = ns("wmo"),
                 label = "Float WMO",
-                choices = unique(RefineParking::c_rover_calib$WMO),
+                choices = unique(RefineParking::wmo_list$WMO),
                 selectize = TRUE,
                 multiple = TRUE,
     ),
@@ -94,25 +94,7 @@ mod_select_float_ui <- function(id){
                 selected = NULL,
                 multiple = TRUE,
                 selectize = TRUE
-    ),
-    checkboxInput(inputId = ns("all_size_classes"),
-                label = "Show all size classes",
-                value = F
-    ),
-    numericInput(inputId = ns("uvp_point_size"),
-                 label = "UVP6 point size",
-                 value = 2,
-                 min = 0.1,
-                 step = 1,
-                 max = Inf),
-    numericInput(inputId = ns("uvp_max_abundance"),
-                 label = "UVP6 max abundance",
-                 value = 10,
-                 min = 0,
-                 max = Inf),
-    checkboxInput(inputId = ns("free_y_scale"),
-                  label = "Free y scales for UVP6 abundance",
-                  value = TRUE)
+    )
   )
 }
 
@@ -129,11 +111,7 @@ mod_select_float_server <- function(id){
       region = reactive(input$region),
       region_colour = reactive(input$region_colour),
       park_depth = reactive(input$park_depth),
-      size_class = reactive(input$size_class),
-      show_all_classes = reactive(input$all_size_classes),
-      uvp_point_size = reactive(input$uvp_point_size),
-      uvp_max_abundance = reactive(input$uvp_max_abundance),
-      free_y_scale = reactive(input$free_y_scale)
+      size_class = reactive(input$size_class)
     )
   })
 }

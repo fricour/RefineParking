@@ -7,20 +7,16 @@
 app_server <- function(input, output, session) {
   Sys.setlocale("LC_TIME", "en_GB.utf8")
 
-  # float data path
-  #path_to_GDAC_CORE_data <- "/home/flo/refine_argo/"
+  # Get paths to BGC-Argo main (CORE) and auxiliary (AUX) files
   path_to_GDAC_CORE_data <- golem::get_golem_options("path_to_GDAC_CORE_data")
-  #path_to_GDAC_CORE_data <- "/data1/GDAC/GDAC/coriolis/"
-  #path_to_GDAC_AUX_data <- "/home/flo/refine_argo/"
   path_to_GDAC_AUX_data <- golem::get_golem_options("path_to_GDAC_AUX_data")
-  #path_to_GDAC_AUX_data <- "/data1/GDAC/AUX/coriolis/"
 
-  # path to argo synthetic profile index file
+  # path to argo synthetic profile index file (in order to get the latitude/longitude for each profile)
   index_data <- request("https://data-argo.ifremer.fr/argo_synthetic-profile_index.txt") %>%
     req_perform() %>%
     resp_body_string()
 
-  # invoque modules
+  # invoke modules
   selected_float <- mod_select_float_server("sidebar")
   float_colour_zone <- mod_float_map_server("float_map", index_data)
   mod_uvp6_server("uvp6", selected_float, float_colour_zone, path_to_GDAC_AUX_data)

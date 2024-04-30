@@ -1,6 +1,6 @@
 #' float_map UI Function
 #'
-#' @description A shiny Module.
+#' @description Trajectories of floats equipped with both the Underwater Vision Profile 6 and the transmissometer used as an Optical Sediment Trap (OST)
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
@@ -33,7 +33,7 @@ mod_float_map_server <- function(id, index_data){
     bio_index <- bio_index %>%
       dplyr::mutate(wmo = purrr::map_chr(.x = bio_index$file, .f = function(x) unlist(stringr::str_split(x, '/'))[2])) %>%
       dplyr::select(wmo, date, latitude, longitude) %>%
-      dplyr::filter(wmo %in% unique(RefineParking::c_rover_calib$WMO)) %>%
+      dplyr::filter(wmo %in% unique(RefineParking::wmo_list$WMO)) %>%
       dplyr::mutate(zone = NA) %>%
       dplyr::mutate(colour = NA) %>%
       dplyr::filter(!is.na(latitude)) %>%
