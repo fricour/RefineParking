@@ -20,14 +20,14 @@ mod_float_map_ui <- function(id){
 #' float_map Server Functions
 #'
 #' @noRd
-mod_float_map_server <- function(id, path_to_index_file){
+mod_float_map_server <- function(id, index_data){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
     w <- waiter::Waiter$new(ns("map"), color = 'white', html = spin_dots())
     w$show()
 
-    bio_index <- tibble::tibble(data.table::fread(path_to_index_file, skip=8))
+    bio_index <- tibble::tibble(data.table::fread(index_data, skip=8))
 
     # format table to keep wmo, profile, date, latitude and longitude + keep only REFINE floats
     bio_index <- bio_index %>%
