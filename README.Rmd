@@ -1,1 +1,4 @@
 # TODO
+
+
+RefineParking::run_app(path_to_GDAC_CORE_data = "/home/flo/refine_argo/", path_to_GDAC_AUX_data = "/home/flo/refine_argo/")

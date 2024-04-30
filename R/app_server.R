@@ -4,18 +4,19 @@
 #'     DO NOT REMOVE.
 #' @import shiny httr2
 #' @noRd
-app_server <- function(input, output, session, path_to_GDAC_CORE_data, path_to_GDAC_AUX_data) {
+app_server <- function(input, output, session) {
   Sys.setlocale("LC_TIME", "en_GB.utf8")
 
   # float data path
   #path_to_GDAC_CORE_data <- "/home/flo/refine_argo/"
+  path_to_GDAC_CORE_data <- golem::get_golem_options("path_to_GDAC_CORE_data")
   #path_to_GDAC_CORE_data <- "/data1/GDAC/GDAC/coriolis/"
   #path_to_GDAC_AUX_data <- "/home/flo/refine_argo/"
+  path_to_GDAC_AUX_data <- golem::get_golem_options("path_to_GDAC_AUX_data")
   #path_to_GDAC_AUX_data <- "/data1/GDAC/AUX/coriolis/"
 
   # path to argo synthetic profile index file
   index_data <- request("https://data-argo.ifremer.fr/argo_synthetic-profile_index.txt") %>%
-    req_progress() %>%
     req_perform() %>%
     resp_body_string()
 
