@@ -29,7 +29,7 @@ mod_float_map_server <- function(id, index_data){
 
     bio_index <- tibble::tibble(data.table::fread(index_data, skip=8))
 
-    # format table to keep wmo, profile, date, latitude and longitude + keep only REFINE floats
+    # format table to keep wmo, profile, date, latitude and longitude
     bio_index <- bio_index %>%
       dplyr::mutate(wmo = purrr::map_chr(.x = bio_index$file, .f = function(x) unlist(stringr::str_split(x, '/'))[2])) %>%
       dplyr::select(wmo, date, latitude, longitude) %>%
@@ -112,7 +112,9 @@ mod_float_map_server <- function(id, index_data){
         addTiles() %>%
         #addCircleMarkers(data = bio_index, lng = ~longitude, lat = ~latitude, popup = ~wmo, color = ~colour) %>%
         #leafgl::addGlPolylines(data = lines_sf, color = ~colour, opacity = 1)
-        addPolylines(data = lines_sf, color = ~colour, opacity = 1, popup = ~htmltools::htmlEscape(wmo), label = ~wmo)
+        addPolylines(data = lines_sf, color = ~colour, opacity = 1, popup = ~htmltools::htmlEscape(wmo), label = ~wmo,
+                     highlightOptions = highlightOptions(color = "white", weight = 5,
+                                                         bringToFront = TRUE, sendToBack = TRUE))
     })
 
     float_colour_zone <- bio_index %>% dplyr::select(wmo, zone, colour) %>% dplyr::distinct()
