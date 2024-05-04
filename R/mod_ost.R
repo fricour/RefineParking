@@ -13,7 +13,12 @@ mod_ost_ui <- function(id){
 
   tagList(
     actionButton(inputId = ns("run_computation"), label = "Compute OST fluxes (only needed when adding or removing floats)"),
-    ggiraph::girafeOutput(ns("plot_parking_OST"), height = "700px")
+    # https://github.com/JohnCoene/waiter/issues/132 -> needed to solve the waiter not showing on first run
+    div(
+      id = ns("ggiraph-container"),
+      style = "min-height:700px",
+      ggiraph::girafeOutput(ns("plot_parking_OST"))
+    )
   )
 }
 
@@ -24,23 +29,55 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    #Sys.setlocale("LC_TIME", "en_GB.utf8")
-
     # create waiter
-    w <- waiter::Waiter$new(ns("plot_parking_OST"), color = 'white', html = spin_dots())
+    host <- waiter::Hostess$new(infinite = TRUE)
+    # w <- waiter::Waiter$new(ns("plot_parking_OST"),
+    #                         color = "white",
+    #                         html = host$get_loader(
+    #                           preset = "circle",
+    #                           text_color = "black",
+    #                           class = "label-center",
+    #                           center_page = FALSE
+    #                         ))
+    w <- waiter::Waiter$new(ns("ggiraph-container"),
+                            color = "white",
+                            html = host$get_loader(
+                              preset = "circle",
+                              text_color = "black",
+                              class = "label-center",
+                              center_page = FALSE
+                            ))
+
+    # color mapping
+    colours <- c(
+      'Labrador Sea' = '#E41A1C',
+      'Arabian Sea' = '#377EB8',
+      'Guinea Dome' = '#4DAF4A',
+      'Apero mission' = '#984EA3',
+      'West Kerguelen' = '#FF7F00',
+      'East Kerguelen' = '#FFFF33',
+      'Tropical Indian Ocean' = '#A65628',
+      'South Pacific Gyre' = '#F781BF',
+      'Nordic Seas' = '#125112',
+      'North Pacific Gyre' = '#91C5F0',
+      'California Current' = '#999999')
 
     # OST data to plot
     ost_data <- eventReactive(input$run_computation, {
       req(c(user_float$park_depth()))
+
+      # start waiter
       w$show()
+      host$start()
+
       # derive ost data
       if(is.null(user_float$region())){
-        tmp <- purrr::map_dfr(user_float$wmo(), extract_ost_data, path_to_data = path_to_floats_data, .progress = TRUE)
+        tmp <- purrr::map_dfr(user_float$wmo(), extract_ost_data, path_to_data = path_to_floats_data, .progress = FALSE)
       }else{
         selected_float <- float_colour_zone %>%
           dplyr::filter(zone %in% user_float$region()) %>%
           dplyr::pull(wmo)
-        tmp <- purrr::map_dfr(selected_float, extract_ost_data, path_to_data = path_to_floats_data, .progress = TRUE)
+        tmp <- purrr::map_dfr(selected_float, extract_ost_data, path_to_data = path_to_floats_data, .progress = FALSE)
       }
       # for plotting
       tmp <- tmp %>%
@@ -48,6 +85,10 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
         dplyr::mutate(min_time = as.Date(min_time))
       # add colour scheme
       tmp <- merge(tmp, float_colour_zone)
+
+      # close waiter
+      host$close()
+      return(tmp)
     })
 
 
@@ -68,18 +109,8 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
       if(user_float$region_colour()){
 
           small_flux <- plot_data %>% ggplot() +
-            geom_point(aes(x = min_time, y = small_flux, colour = zone, shape = park_depth)) +
-            scale_colour_manual(values = c('Labrador Sea' = '#E41A1C',
-                                        'Arabian Sea' = '#377EB8',
-                                        'Guinea Dome' = '#4DAF4A',
-                                        'Apero mission' = '#984EA3',
-                                        'West Kerguelen' = '#FF7F00',
-                                        'East Kerguelen' = '#FFFF33',
-                                        'Tropical Indian Ocean' = '#A65628',
-                                        'South Pacific Gyre' = '#F781BF',
-                                        'Nordic Seas' = '#125112',
-                                        'North Pacific Gyre' = '#91C5F0',
-                                        'California Current' = '#999999')) +
+            geom_point_interactive(aes(x = min_time, y = small_flux, colour = zone, shape = park_depth, tooltip = round(small_flux, 2))) +
+            scale_colour_manual(values = colours) +
             theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{small}$')) +
             scale_y_continuous(trans = 'log10') +
             theme(legend.position = "top") +
@@ -92,18 +123,8 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
                   axis.ticks.x=element_blank())
 
         large_flux <- plot_data %>% ggplot() +
-          geom_point(aes(x = min_time, y = large_flux, colour = zone, shape = park_depth)) +
-          scale_colour_manual(values = c('Labrador Sea' = '#E41A1C',
-                                         'Arabian Sea' = '#377EB8',
-                                         'Guinea Dome' = '#4DAF4A',
-                                         'Apero mission' = '#984EA3',
-                                         'West Kerguelen' = '#FF7F00',
-                                         'East Kerguelen' = '#FFFF33',
-                                         'Tropical Indian Ocean' = '#A65628',
-                                         'South Pacific Gyre' = '#F781BF',
-                                         'Nordic Seas' = '#125112',
-                                         'North Pacific Gyre' = '#91C5F0',
-                                         'California Current' = '#999999')) +
+          geom_point_interactive(aes(x = min_time, y = large_flux, colour = zone, shape = park_depth, tooltip = round(large_flux, 2))) +
+          scale_colour_manual(values = colours) +
           theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{large}$')) +
           scale_y_continuous(trans = 'log10') +
           theme(legend.position = "none") +
@@ -116,18 +137,8 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
               axis.ticks.x=element_blank())
 
         total_flux <- plot_data %>% ggplot() +
-          geom_point(aes(x = min_time, y = total_flux, colour = zone, shape = park_depth)) +
-          scale_colour_manual(values = c('Labrador Sea' = '#E41A1C',
-                                         'Arabian Sea' = '#377EB8',
-                                         'Guinea Dome' = '#4DAF4A',
-                                         'Apero mission' = '#984EA3',
-                                         'West Kerguelen' = '#FF7F00',
-                                         'East Kerguelen' = '#FFFF33',
-                                         'Tropical Indian Ocean' = '#A65628',
-                                         'South Pacific Gyre' = '#F781BF',
-                                         'Nordic Seas' = '#125112',
-                                         'North Pacific Gyre' = '#91C5F0',
-                                         'California Current' = '#999999')) +
+          geom_point_interactive(aes(x = min_time, y = total_flux, colour = zone, shape = park_depth, tooltip = round(total_flux, 2))) +
+          scale_colour_manual(values = colours) +
           theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{total}$')) +
           scale_y_continuous(trans = 'log10') +
           theme(legend.position = "none") +
@@ -137,13 +148,11 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
           theme(axis.text.x = element_text(angle=45, hjust = 1))
 
       # final plot combining both small and large fluxes
-      #p <- gridExtra::grid.arrange(small_flux, large_flux, nrow = 2)
-      #p <- cowplot::plot_grid(small_flux, large_flux, total_flux, nrow = 3)
       p <- patchwork::wrap_plots(small_flux, large_flux, total_flux, nrow = 3)
       ggiraph::girafe(ggobj = p, width_svg = 8)
       }else{
         small_flux <- plot_data %>% ggplot() +
-          geom_point(aes(x = min_time, y = small_flux, colour = factor(wmo), shape = park_depth)) +
+          geom_point_interactive(aes(x = min_time, y = small_flux, colour = factor(wmo), shape = park_depth, tooltip = round(small_flux, 2))) +
           theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{small}$')) +
           scale_y_continuous(trans = 'log10') +
           theme(legend.position = "top") +
@@ -156,7 +165,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
                 axis.ticks.x=element_blank())
 
         large_flux <- plot_data %>% ggplot() +
-          geom_point(aes(x = min_time, y = large_flux, colour = factor(wmo), shape = park_depth)) +
+          geom_point_interactive(aes(x = min_time, y = large_flux, colour = factor(wmo), shape = park_depth, tooltip = round(large_flux, 2))) +
           theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{large}$')) +
           scale_y_continuous(trans = 'log10') +
           theme(legend.position = "none") +
@@ -169,7 +178,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
                 axis.ticks.x=element_blank())
 
         total_flux <- plot_data %>% ggplot() +
-          geom_point(aes(x = min_time, y = total_flux, colour = factor(wmo), shape = park_depth)) +
+          geom_point_interactive(aes(x = min_time, y = total_flux, colour = factor(wmo), shape = park_depth, tooltip = round(total_flux, 2))) +
           theme_bw() + labs(x = 'Date', y = latex2exp::TeX('$F_{total}$')) +
           scale_y_continuous(trans = 'log10') +
           theme(legend.position = "none") +

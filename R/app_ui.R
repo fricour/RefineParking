@@ -9,7 +9,11 @@ app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
+    # needed to show progress bar
     waiter::use_waiter(),
+    waiter::use_hostess(),
+    # url <- "https://www.freecodecamp.org/news/content/images/size/w2000/2020/04/w-qjCHPZbeXCQ-unsplash.jpg",
+    # waiter::waiterPreloader(html = h1("Science is on its way !"), image = url),
     # Your application UI logic
     page_sidebar(
       theme = bs_theme(version = 5), # wiser to hard-code it, see https://rstudio.github.io/bslib/articles/dashboards/index.html

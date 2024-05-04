@@ -74,9 +74,6 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
                    `1630` = '1.63 - 2.05 mm',
                    `2050` = '2.05 - 2.50 mm')
 
-    # create waiter
-    w <- waiter::Waiter$new(ns("plot_parking_uvp"), color = 'white', html = spin_dots())
-
     # add debounce option if floats are selected too fast
     float_d <- user_float$wmo %>% debounce(1000)
 
@@ -95,7 +92,7 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
           size_class_to_show <- size_class_d()
         }
         # compute particle concentration
-        tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = TRUE)
+        tmp <- purrr::map_dfr(float_d(), compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = FALSE)
       }else{
         selected_float <- float_colour_zone %>%
           dplyr::filter(zone %in% user_float$region()) %>%
@@ -106,7 +103,7 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
           size_class_to_show <- size_class_d()
         }
         # compute particle concentration
-        tmp <- purrr::map_dfr(selected_float, compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = TRUE)
+        tmp <- purrr::map_dfr(selected_float, compute_daily_mean_part_conc, lpm_classes = size_class_to_show, path_to_data = path_to_floats_data, .progress = FALSE)
       }
       # add colour based on the region
       tmp <- merge(tmp, float_colour_zone)
@@ -117,6 +114,8 @@ mod_uvp6_server <- function(id, user_float, float_colour_zone, path_to_floats_da
         park_depth == '1000 m' ~ '#440154')
       ) %>%
       dplyr::mutate(park_depth = factor(park_depth, levels = c('200 m', '500 m', '1000 m')))
+
+      return(tmp)
     })
 
     # render plot of particle concentration
