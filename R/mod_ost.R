@@ -14,11 +14,12 @@ mod_ost_ui <- function(id){
   tagList(
     actionButton(inputId = ns("run_computation"), label = "Compute OST fluxes (only needed when adding or removing floats)"),
     # https://github.com/JohnCoene/waiter/issues/132 -> needed to solve the waiter not showing on first run
-    div(
-      id = ns("ggiraph-container"),
-      style = "min-height:700px",
-      ggiraph::girafeOutput(ns("plot_parking_OST"))
-    )
+    # div(
+    #   id = ns("ggiraph-container"),
+    #   ggiraph::girafeOutput(ns("plot_parking_OST"))
+    # )
+    waiter::attendantBar(ns("progress-bar")),
+    ggiraph::girafeOutput(ns("plot_parking_OST"))
   )
 }
 
@@ -30,7 +31,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
     ns <- session$ns
 
     # create waiter
-    host <- waiter::Hostess$new(infinite = TRUE)
+    # host <- waiter::Hostess$new(infinite = TRUE)
     # w <- waiter::Waiter$new(ns("plot_parking_OST"),
     #                         color = "white",
     #                         html = host$get_loader(
@@ -39,14 +40,16 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
     #                           class = "label-center",
     #                           center_page = FALSE
     #                         ))
-    w <- waiter::Waiter$new(ns("ggiraph-container"),
-                            color = "white",
-                            html = host$get_loader(
-                              preset = "circle",
-                              text_color = "black",
-                              class = "label-center",
-                              center_page = FALSE
-                            ))
+    # w <- Waiter$new(
+    #   color = "white",
+    #   html = waiter::attendantBar(
+    #     ns("progress-bar"),
+    #     width = 200, # MUST be set with waiter
+    #     text = "loading stuff"
+    #   )
+    # )
+
+    att <- waiter::Attendant$new(ns("progress-bar"), hide_on_max = TRUE)
 
     # color mapping
     colours <- c(
@@ -67,8 +70,10 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
       req(c(user_float$park_depth()))
 
       # start waiter
-      w$show()
-      host$start()
+      # w$show()
+      # host$start()
+      #w$show()
+      att$auto()
 
       # derive ost data
       if(is.null(user_float$region())){
@@ -87,7 +92,12 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
       tmp <- merge(tmp, float_colour_zone)
 
       # close waiter
-      host$close()
+      # host$close()
+      on.exit({
+        att$done()
+        #w$hide()
+      })
+      #w$hide()
       return(tmp)
     })
 
@@ -189,6 +199,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
 
         p <- patchwork::wrap_plots(small_flux, large_flux, total_flux, nrow = 3)
         ggiraph::girafe(ggobj = p, width_svg = 8)
+
       }
     })
 

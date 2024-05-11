@@ -12,6 +12,7 @@ app_ui <- function(request) {
     # needed to show progress bar
     waiter::use_waiter(),
     waiter::use_hostess(),
+    waiter::useAttendant(),
     # url <- "https://www.freecodecamp.org/news/content/images/size/w2000/2020/04/w-qjCHPZbeXCQ-unsplash.jpg",
     # waiter::waiterPreloader(html = h1("Science is on its way !"), image = url),
     # Your application UI logic
@@ -40,6 +41,7 @@ app_ui <- function(request) {
           )
         ),
         navset_card_tab(
+          id = "ost-tab",
           title = "Transmissometer data",
           full_screen = TRUE,
           nav_panel("OST flux", mod_ost_ui("ost")),
