@@ -18,7 +18,14 @@ mod_ost_ui <- function(id){
     #   id = ns("ggiraph-container"),
     #   ggiraph::girafeOutput(ns("plot_parking_OST"))
     # )
-    waiter::attendantBar(ns("progress-bar")),
+    waiter::attendantBar(
+      ns("progress-bar-ost"),
+      max = 1000,
+      color = "info",
+      striped = TRUE,
+      animated = TRUE,
+      hidden = TRUE
+    ),
     ggiraph::girafeOutput(ns("plot_parking_OST"))
   )
 }
@@ -30,7 +37,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    # create waiter
+    # create waiter -> wait for the bug resolution see https://github.com/JohnCoene/waiter/issues/148
     # host <- waiter::Hostess$new(infinite = TRUE)
     # w <- waiter::Waiter$new(ns("plot_parking_OST"),
     #                         color = "white",
@@ -49,7 +56,7 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
     #   )
     # )
 
-    att <- waiter::Attendant$new(ns("progress-bar"), hide_on_max = TRUE)
+    att <- waiter::Attendant$new(ns("progress-bar-ost"), hide_on_max = TRUE)
 
     # color mapping
     colours <- c(
@@ -67,12 +74,14 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
 
     # OST data to plot
     ost_data <- eventReactive(input$run_computation, {
-      req(c(user_float$park_depth()))
+      shiny::validate(shiny::need(user_float$park_depth(), message = "Select a depth."))
+      shiny::validate(shiny::need(user_float$wmo(), message = "Select a WMO."))
 
       # start waiter
       # w$show()
       # host$start()
       #w$show()
+      att$set(100) # this is needed, otherwise the attendant bar only shows once.. (with the module structure) -> here, it's 100 out of 1000 (max chosen here)
       att$auto()
 
       # derive ost data
@@ -93,11 +102,12 @@ mod_ost_server <- function(id, user_float, float_colour_zone, path_to_floats_dat
 
       # close waiter
       # host$close()
-      on.exit({
-        att$done()
-        #w$hide()
-      })
+      # on.exit({
+      #   att$done()
+      #   #w$hide()
+      # })
       #w$hide()
+      att$done()
       return(tmp)
     })
 

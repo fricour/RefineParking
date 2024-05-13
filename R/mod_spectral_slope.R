@@ -12,6 +12,14 @@ mod_spectral_slope_ui <- function(id){
   ns <- NS(id)
   tagList(
     actionButton(inputId = ns("compute_spectral_slope"), label = "Compute spectral slope (only needed when adding or removing floats)"),
+    waiter::attendantBar(
+      ns("progress-bar-spectral-slope"),
+      max = 1000,
+      color = "info",
+      striped = TRUE,
+      animated = TRUE,
+      hidden = TRUE
+    ),
     girafeOutput(ns("plot_spectral_slope"), height = "700px", width = "100%")
   )
 }
@@ -23,24 +31,29 @@ mod_spectral_slope_server <- function(id, user_float, float_colour_zone, path_to
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
+    att <- waiter::Attendant$new(ns("progress-bar-spectral-slope"), hide_on_max = TRUE)
+
     # see https://waiter.john-coene.com/#/hostess, section Infinite (the section Multiple is also interesting)
-    host <- waiter::Hostess$new(infinite = TRUE)
-    w <- waiter::Waiter$new(ns("plot_spectral_slope"),
-                            color = "white",
-                            html = host$get_loader(
-                              preset = "circle", # could also be bubble, etc...
-                              text_color = "black",
-                              class = "label-center",
-                              center_page = FALSE,
-                            ))
+    # host <- waiter::Hostess$new(infinite = TRUE)
+    # w <- waiter::Waiter$new(ns("plot_spectral_slope"),
+    #                         color = "white",
+    #                         html = host$get_loader(
+    #                           preset = "circle", # could also be bubble, etc...
+    #                           text_color = "black",
+    #                           class = "label-center",
+    #                           center_page = FALSE,
+    #                         ))
 
     # slope data to plot
     slope_data <- eventReactive(input$compute_spectral_slope, {
-      #req(user_float$wmo())
+      shiny::validate(shiny::need(user_float$park_depth(), message = "Select a depth."))
+      shiny::validate(shiny::need(user_float$wmo(), message = "Select a WMO."))
 
       # start waiter
-      w$show()
-      host$start()
+      # w$show()
+      # host$start()
+      att$set(100)
+      att$auto()
 
       # compute daily meaan spectral slope for all floats given in input
       if(is.null(user_float$region())){
@@ -62,7 +75,8 @@ mod_spectral_slope_server <- function(id, user_float, float_colour_zone, path_to
         dplyr::mutate(park_depth = factor(park_depth, levels = c('200 m', '500 m', '1000 m')))
 
       # close waiter (otherwise, it's gonna be .. infinite !)
-      host$close()
+      # host$close()
+      att$done()
       return(tmp)
     })
 

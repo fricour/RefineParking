@@ -9,9 +9,9 @@ app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
-    # needed to show progress bar
     waiter::use_waiter(),
-    waiter::use_hostess(),
+    # needed to show progress bar
+    # waiter::use_hostess(), -> BUG, see issues on github with the waiter package
     waiter::useAttendant(),
     # url <- "https://www.freecodecamp.org/news/content/images/size/w2000/2020/04/w-qjCHPZbeXCQ-unsplash.jpg",
     # waiter::waiterPreloader(html = h1("Science is on its way !"), image = url),
@@ -37,8 +37,13 @@ app_ui <- function(request) {
           nav_panel("Spectral slope", mod_spectral_slope_ui("spectral_slope")),
           nav_panel(
             shiny::icon("circle-info"),
-            shiny::markdown("TODO")
-          )
+            shiny::markdown("
+                            More info on the UVP6: [paper](https://aslopubs.onlinelibrary.wiley.com/doi/10.1002/lom3.10475) and [manufacturer](http://www.hydroptic.com/index.php/public/Page/product_item/UVP6-LP) <br>
+                            <br>
+                            More info on the embedded classification algorithm (UVPec): [Zenodo](https://zenodo.org/records/10694204) - [Pypi](https://pypi.org/project/uvpec/) - [Git](https://github.com/ecotaxa/uvpec)
+                            ")
+          )#,
+          #footer = tags$p("Footer test") # need to wait for the fix to be applied on bslib https://github.com/rstudio/bslib/issues/1024
         ),
         navset_card_tab(
           id = "ost-tab",
